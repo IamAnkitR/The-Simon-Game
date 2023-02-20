@@ -1,8 +1,18 @@
 const buttonColours = ["red", "blue", "green", "yellow"];
+
 let gamePattern = [];
 let userClickedPattern = [];
+
 let level = 0;
 let started = false;
+
+
+function startOver(){  
+    gamePattern = [];
+    userClickedPattern = [];
+    level = 0;
+    nextSequence();
+}
 
 
 $(document).keypress(function(){
@@ -13,7 +23,54 @@ $(document).keypress(function(){
     }
 })
 
+$(".btn").on("click", function() {
+    let userChosenColour = $(this).attr("id");
+    userClickedPattern.push(userChosenColour); 
+    makeSound(userChosenColour);
+    animatePress(userChosenColour);
+
+    checkAnswer(userClickedPattern.length-1);
+  });
+
+
+  function checkAnswer(currentLevel) {
+
+    //3. Write an if statement inside checkAnswer() to check if the most recent user answer is the same as the game pattern. If so then log "success", otherwise log "wrong".
+    if (gamePattern[currentLevel] === userClickedPattern[currentLevel]) {
+
+      console.log("success");
+
+      //4. If the user got the most recent answer right in step 3, then check that they have finished their sequence with another if statement.
+      if (userClickedPattern.length === gamePattern.length){
+
+        //5. Call nextSequence() after a 1000 millisecond delay.
+        setTimeout(function () {
+          nextSequence();
+        }, 1000);
+
+      }
+
+    } else {
+        $("body").addClass("game-over")
+        setTimeout(function(){
+            $("body").removeClass("game-over")
+        },200)
+        $("#level-title").text("Game Over, Press any key to Restart");
+        var audio = new Audio("sounds/wrong.mp3");
+        audio.play();
+        let startAgain = false;
+        $(document).keypress(function(){
+            if(!startAgain){
+                startOver();
+                startAgain = true;
+            }
+        })   
+    }
+
+}  
+
 function nextSequence(){
+    userClickedPattern = [];
     level++;
     $("#level-title").text("Level "+level);
     let randomNumber = Math.floor(Math.random()*4);
@@ -23,41 +80,8 @@ function nextSequence(){
     makeSound(randomChosenColour);
 }
 
-$(".btn").on("click", function() {
-    let userChosenColour = $(this).attr("id");
-    userClickedPattern.push(userChosenColour); 
-    makeSound(userChosenColour);
-    animatePress(userChosenColour);
-  });
-  
-
-
 function makeSound(colour){
-    let track = "";
-
-    switch(colour){
-        case "red":
-            track = "sounds/red.mp3"
-            break;
-    
-        case "green":
-            track = "sounds/green.mp3"
-            break;
-            
-        case "blue":
-            track = "sounds/blue.mp3"
-            break;
-            
-        case "yellow":
-            track = "sounds/yellow.mp3"
-            break;
-            
-        default:
-            track = "sounds/wrong.mp3"
-    
-    }
-
-    var audio = new Audio(track);
+    var audio = new Audio("sounds/"+colour+".mp3");
     audio.play();
 }
 
